@@ -14,7 +14,7 @@ pipeline {
                     emailext (
                         subject: "Pipeline Started: ${currentBuild.fullDisplayName}",
                         body: "The ${currentBuild.fullDisplayName} pipeline has started on ${env.NODE_NAME}.",
-                        to: 'tamilvanan.gowran@quadgen.com,vigneshwaran.sivasubramanian@quadgen.com'
+                        to: 'tamilbecse139@gmail.com,vignesh-s19.sivasubramanian@quadgen.com'
                     )
                 }
             }
@@ -35,19 +35,19 @@ pipeline {
                     // Fetch PR details
                     def prDetails = sh(script: """
                         curl -u github-credentials \
-                        -s https://api.github.com/repos/vigneshwaran/vikki/pulls/${prNumber}
+                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}
                     """, returnStatus: false, returnStdout: true).trim()
                     
                     // Fetch the commit message
                     def commitMessage = sh(script: """
                         curl -u github-credentials \
-                        -s https://api.github.com/repos/vigneshwaran/vikki/pulls/${prNumber}/commits
+                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}/commits
                     """, returnStatus: false, returnStdout: true).trim()
                     
                     // Fetch PR creator's username
                     def prCreator = sh(script: """
                         curl -u github-credentials \
-                        -s https://api.github.com/repos/vigneshwaran/vikki/pulls/${prNumber} | jq -r '.user.login'
+                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber} | jq -r '.user.login'
                     """, returnStatus: false, returnStdout: true).trim()
                     
                     echo "Pull Request Details:"
@@ -64,12 +64,12 @@ pipeline {
                     def prNumber = env.CHANGE_ID // Jenkins environment variable for PR number
                     def prCreator = sh(script: """
                         curl -u github-credentials \
-                        -s https://api.github.com/repos/vigneshwaran/vikki/pulls/${prNumber} | jq -r '.user.login'
+                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber} | jq -r '.user.login'
                     """, returnStatus: false, returnStdout: true).trim()
                     
                     def commitMessage = sh(script: """
                         curl -u github-credentials \
-                        -s https://api.github.com/repos/vigneshwaran/vikki/pulls/${prNumber}/commits
+                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}/commits
                     """, returnStatus: false, returnStdout: true).trim()
                     
                     emailext body: "Pull Request Details:\n" +
@@ -77,9 +77,9 @@ pipeline {
                                    "PR Creator: ${prCreator}\n" +
                                    "Commit Message: ${commitMessage}",
                              subject: "Pull Request Details for PR#${prNumber}",
-                             to: 'tamilbecse139@gmail.com,vigneshwaran.sivasubramanian@quadgen.com',
+                             to: 'tamilbecse139@gmail.com,vignesh-s19.sivasubramanian@quadgen.com',
                              mimeType: 'text/plain',
-                             replyTo: 'tamilbecse139@gmail.com,vigneshwaran.sivasubramanian@quadgen.com'
+                             replyTo: 'tamilbecse139@gmail.com,vignesh-s19.sivasubramanian@quadgen.com'
                 }
             }
         }
