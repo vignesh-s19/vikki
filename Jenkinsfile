@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Set your GitHub credentials ID here
-        GITHUB_CREDENTIALS = credentials('Jenkins-cred')
+        GITHUB_CREDENTIALS = credentials('Vikki-Github')
     }
     
 
