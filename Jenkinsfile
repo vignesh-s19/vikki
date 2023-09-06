@@ -72,8 +72,8 @@ pipeline {
                              to: 'tamilbecse139@gmail.com,vigneshwaran.sivasubramanian@quadgen.com',
                              mimeType: 'text/plain',
 
-                }
+                        }
             }
         }
-    }
+    
 }
