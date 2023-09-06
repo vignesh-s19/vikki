@@ -27,59 +27,51 @@ pipeline {
         //     }
         // }
         
-        stage('Print PR Details') {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Capture Pull Request Details') {
             steps {
                 script {
-                    def prNumber = env.CHANGE_ID // Jenkins environment variable for PR number
-                    
-                    // Fetch PR details
-                    def prDetails = sh(script: """
-                        curl -u github-credentials \
-                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}
-                    """, returnStatus: false, returnStdout: true).trim()
-                    
-                    // Fetch the commit message
-                    def commitMessage = sh(script: """
-                        curl -u github-credentials \
-                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}/commits
-                    """, returnStatus: false, returnStdout: true).trim()
-                    
-                    // Fetch PR creator's username
-                    def prCreator = sh(script: """
-                        curl -u github-credentials \
-                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber} | jq -r '.user.login'
-                    """, returnStatus: false, returnStdout: true).trim()
-                    
-                    echo "Pull Request Details:"
-                    echo "PR Number: ${prNumber}"
-                    echo "PR Creator: ${prCreator}"
-                    echo "Commit Message: ${commitMessage}"
+                    def gitCommit = sh(script: 'git log --format=%H -n 1', returnStdout: true).trim()
+                    def prDetailsJson = sh(script: "curl -sSL https://api.github.com/repos/devopstamil/test/commits/$gitCommit/pulls", returnStdout: true).trim()
+
+                    // Parse the JSON response using JsonSlurper
+                    def jsonSlurper = new groovy.json.JsonSlurper()
+                    def prDetails = jsonSlurper.parseText(prDetailsJson)
+
+                    // Extract title and body
+                    def prTitle = prDetails.title
+                    def prBody = prDetails.body
+
+
+                    // Set environment variables
+                    env.PULL_REQUEST_TITLE = prTitle
+                    env.PULL_REQUEST_BODY = prBody
                 }
             }
         }
+        stage('Echo Pull Request Details') {
+            steps {
+                echo "Pull Request Title: ${env.PULL_REQUEST_TITLE}"
+                echo "Pull Request Body: ${env.PULL_REQUEST_BODY}"
+            }
+        }
+
         
         stage('Send Email') {
             steps {
-                script {
-                    def prNumber = env.CHANGE_ID // Jenkins environment variable for PR number
-                    def prCreator = sh(script: """
-                        curl -u github-credentials \
-                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber} | jq -r '.user.login'
-                    """, returnStatus: false, returnStdout: true).trim()
-                    
-                    def commitMessage = sh(script: """
-                        curl -u github-credentials \
-                        -s https://api.github.com/repos/vignesh-s19/vikki/pulls/${prNumber}/commits
-                    """, returnStatus: false, returnStdout: true).trim()
-                    
+                script {                  
                     emailext body: "Pull Request Details:\n" +
-                                   "PR Number: ${prNumber}\n" +
-                                   "PR Creator: ${prCreator}\n" +
+                                   "PR Number: ${PULL_REQUEST_BODY}\n" +
+                                   "PR Creator: ${PULL_REQUEST_TITLE}\n" +
                                    "Commit Message: ${commitMessage}",
                              subject: "Pull Request Details for PR#${prNumber}",
-                             to: 'tamilbecse139@gmail.com,vignesh-s19.sivasubramanian@quadgen.com',
+                             to: 'tamilbecse139@gmail.com,vigneshwaran.sivasubramanian@quadgen.com',
                              mimeType: 'text/plain',
-                             replyTo: 'tamilbecse139@gmail.com,vignesh-s19.sivasubramanian@quadgen.com'
+
                 }
             }
         }
