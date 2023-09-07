@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Set your GitHub credentials ID here
-        GITHUB_CREDENTIALS = credentials('Vikki-Github')
+        GITHUB_CREDENTIALS = credentials('Github-Token-Jenkins-Mail-CICD')
     }
     
 
@@ -22,21 +22,14 @@ pipeline {
 
         // stage('Checkout') {
         //     steps {
-        //         // Checkout the code from your SCM (e.g., Git)
         //         checkout scm
         //     }
         // }
-        
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
         stage('Capture Pull Request Details') {
             steps {
                 script {
                     def gitCommit = sh(script: 'git log --format=%H -n 1', returnStdout: true).trim()
-                    def prDetailsJson = sh(script: "curl -sSL https://api.github.com/repos/devopstamil/test/commits/$gitCommit/pulls", returnStdout: true).trim()
+                    def prDetailsJson = sh(script: "curl -sSL https://api.github.com/repos/vignesh-s19/vikki/commits/$gitCommit/pulls", returnStdout: true).trim()
 
                     // Parse the JSON response using JsonSlurper
                     def jsonSlurper = new groovy.json.JsonSlurper()
@@ -45,11 +38,12 @@ pipeline {
                     // Extract title and body
                     def prTitle = prDetails.title
                     def prBody = prDetails.body
-
+                    def prID = prDetails.id
 
                     // Set environment variables
                     env.PULL_REQUEST_TITLE = prTitle
                     env.PULL_REQUEST_BODY = prBody
+                    env.PULL_REQUEST_ID = prID
                 }
             }
         }
@@ -57,6 +51,7 @@ pipeline {
             steps {
                 echo "Pull Request Title: ${env.PULL_REQUEST_TITLE}"
                 echo "Pull Request Body: ${env.PULL_REQUEST_BODY}"
+                echo "Pull Request ID: ${env.PULL_REQUEST_ID}"
             }
         }
 
@@ -73,7 +68,7 @@ pipeline {
                              mimeType: 'text/plain',
 
                         }
-            }
+              }
         }
-    
+    }
 }
